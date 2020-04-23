@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Dict
 
 from airflow.models.baseoperator import BaseOperator
 from airflow.models.xcom import XCOM_RETURN_KEY
@@ -24,17 +24,17 @@ class XComArg:
     def __rshift__(self, other):
         self.set_downstream(other)
 
-    def resolve(self, context: dict) -> Any:
+    def resolve(self, context: dict) -> Dict[Any]:
         """
         Pull XCom value for the existing arg.
         """
-        all_results = []
+        all_results = {}
         for key in self._keys:
-            all_results.append(self._operator.xcom_pull(
+            all_results[key] = self._operator.xcom_pull(
                 context=context,
                 task_ids=[self._operator.task_id],
                 key=key,
-                dag_id=self._operator.dag.dag_id))
+                dag_id=self._operator.dag.dag_id)
         return all_results
 
     # def __getitem__(self, key: str) -> 'XComArg':

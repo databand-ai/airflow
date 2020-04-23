@@ -811,6 +811,7 @@ class BaseOperator(Operator, LoggingMixin):
             else:
                 return jinja_env.from_string(content).render(**context)
 
+        from airflow.models.xcom_arg import XComArg
         if isinstance(content, tuple):
             if type(content) is not tuple:  # pylint: disable=unidiomatic-typecheck
                 # Special case for named tuples
@@ -828,6 +829,9 @@ class BaseOperator(Operator, LoggingMixin):
 
         elif isinstance(content, set):
             return {self.render_template(element, context, jinja_env) for element in content}
+
+        elif isinstance(content, XComArg):
+            return content.resolve(context)
 
         else:
             if seen_oids is None:
