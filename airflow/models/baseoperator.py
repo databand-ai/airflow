@@ -1067,10 +1067,17 @@ class BaseOperator(Operator, LoggingMixin):
                        task_or_task_list: Union['BaseOperator', List['BaseOperator']],
                        upstream: bool = False) -> None:
         """Sets relatives for the task or task list."""
+        from airflow.models.xcom_arg import XComArg
+
         try:
             task_list = list(task_or_task_list)  # type: ignore
         except TypeError:
             task_list = [task_or_task_list]  # type: ignore
+
+        task_list = [
+            t._operator if isinstance(t, XComArg) else t  # pylint: disable=protected-access
+            for t in task_list
+        ]
 
         for task in task_list:
             if not isinstance(task, BaseOperator):
