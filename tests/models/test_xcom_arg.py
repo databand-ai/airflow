@@ -108,3 +108,9 @@ class TestXComArg:
         assert len(op_a.upstream_list) == 2
         assert op_b in op_a.upstream_list
         assert bash_op in op_a.upstream_list
+
+    def test_xcom_arg_property_of_base_operator(self):
+        with DAG("test_set_downstream", default_args=default_args):
+            op_a = BashOperator(task_id="a", bash_command="echo a")
+
+        assert op_a.output == XComArg(op_a)

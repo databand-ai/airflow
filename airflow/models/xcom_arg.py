@@ -23,12 +23,24 @@ from airflow.models.xcom import XCOM_RETURN_KEY
 
 class XComArg:
     """
-    Class that represents a XCom push from a previous operator. Defaults to "return_value" as only key.
+    Class that represents a XCom push from a previous operator.
+    Defaults to "return_value" as only key.
     """
 
     def __init__(self, operator: BaseOperator, keys: Optional[List[str]] = None):
         self._operator = operator
         self._keys = keys or [XCOM_RETURN_KEY]
+
+    def __eq__(self, other):
+        return self._operator == other._operator  # pylint: disable=protected-access
+
+    def __lshift__(self, other):
+        self.set_upstream(other)
+        return self
+
+    def __rshift__(self, other):
+        self.set_downstream(other)
+        return self
 
     def set_upstream(self, task_or_task_list: Union[BaseOperator, List[BaseOperator]]):
         """
@@ -43,14 +55,6 @@ class XComArg:
         Proxy to underlying operator set_downstream method
         """
         self._operator.set_downstream(task_or_task_list)
-
-    def __lshift__(self, other):
-        self.set_upstream(other)
-        return self
-
-    def __rshift__(self, other):
-        self.set_downstream(other)
-        return self
 
     def resolve(self, context: Dict) -> Any:
         """

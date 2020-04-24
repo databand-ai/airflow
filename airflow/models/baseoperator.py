@@ -1075,7 +1075,7 @@ class BaseOperator(Operator, LoggingMixin):
             task_list = [task_or_task_list]  # type: ignore
 
         task_list = [
-            t._operator if isinstance(t, XComArg) else t  # pylint: disable=protected-access
+            t._operator if isinstance(t, XComArg) else t  # pylint: disable=protected-access  type: ignore
             for t in task_list
         ]
 
@@ -1130,6 +1130,12 @@ class BaseOperator(Operator, LoggingMixin):
         task.
         """
         self._set_relatives(task_or_task_list, upstream=True)
+
+    @property
+    def output(self):
+        """Returns default XComArg for the operator"""
+        from airflow.models.xcom_arg import XComArg
+        return XComArg(operator=self)
 
     @staticmethod
     def xcom_push(
