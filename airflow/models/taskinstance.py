@@ -1019,6 +1019,7 @@ class TaskInstance(Base, LoggingMixin):
                             # if it goes beyond
                             exit_stack.enter_context(timeout(int(
                                 task_copy.execution_timeout.total_seconds())))
+                            result = task_copy.execute(context=context)
                         except AirflowTaskTimeout:
                             task_copy.on_kill()
                             raise
