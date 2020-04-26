@@ -39,6 +39,7 @@ from sqlalchemy.orm import reconstructor
 from sqlalchemy.orm.session import Session
 from sqlalchemy.sql.elements import BooleanClauseList
 
+import airflow.task.context.execution_context
 from airflow import settings
 from airflow.configuration import conf
 from airflow.exceptions import (
@@ -53,7 +54,6 @@ from airflow.models.xcom import XCOM_RETURN_KEY, XCom
 from airflow.sentry import Sentry
 from airflow.settings import STORE_SERIALIZED_DAGS
 from airflow.stats import Stats
-from airflow.task.context.current import set_current_context
 from airflow.ti_deps.dep_context import DepContext
 from airflow.ti_deps.dependencies_deps import REQUEUEABLE_DEPS, RUNNING_DEPS
 from airflow.utils import timezone
@@ -1012,6 +1012,7 @@ class TaskInstance(Base, LoggingMixin):
                     self.log.exception(e3)
 
                 with ExitStack() as exit_stack:
+                    from airflow.task.context.current import set_current_context
                     exit_stack.enter_context(set_current_context(context))
                     if task_copy.execution_timeout:
                         try:
@@ -1269,7 +1270,7 @@ class TaskInstance(Base, LoggingMixin):
         return self.task.retries and self.try_number <= self.max_tries
 
     @provide_session
-    def get_template_context(self, session=None) -> Dict[str, Any]:
+    def get_template_context(self, session=None) -> airflow.task.context.execution_context.ExecutionContext:
         task = self.task
         from airflow import macros
 
@@ -1388,7 +1389,7 @@ class TaskInstance(Base, LoggingMixin):
             ):
                 return Variable.get(item, default_var=default_var, deserialize_json=True)
 
-        return {
+        context = {
             'conf': conf,
             'dag': task.dag,
             'dag_run': dag_run,
@@ -1427,6 +1428,8 @@ class TaskInstance(Base, LoggingMixin):
             'yesterday_ds': yesterday_ds,
             'yesterday_ds_nodash': yesterday_ds_nodash,
         }
+
+        return airflow.task.context.execution_context.ExecutionContext(**context)
 
     def get_rendered_template_fields(self):
         """

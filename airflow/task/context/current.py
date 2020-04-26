@@ -16,9 +16,9 @@
 # under the License.
 
 import contextlib
-from typing import Dict
 
 from airflow.exceptions import AirflowException
+from airflow.task.context.execution_context import ExecutionContext
 
 _CURRENT_CONTEXT = []
 
@@ -38,7 +38,7 @@ def set_current_context(context):
             print("TODO WARNING")
 
 
-def get_current_context() -> Dict[str, str]:
+def get_current_context() -> ExecutionContext:
     """
     Obtain the execution context for the currently executing operator without
     altering user method's signature.
