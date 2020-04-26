@@ -33,7 +33,7 @@ class XComArg:
         op >> xcomarg   (by BaseOperator code)
         op << xcomarg   (by BaseOperator code)
 
-    **Example**: The moment you got result from any op (functional or regular one) you can ::
+    **Example**: The moment you get a result from any operator (functional or regular) you can ::
 
         xcomarg = ...
         my_op = MyOperator()
