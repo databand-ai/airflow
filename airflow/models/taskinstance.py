@@ -39,7 +39,6 @@ from sqlalchemy.orm import reconstructor
 from sqlalchemy.orm.session import Session
 from sqlalchemy.sql.elements import BooleanClauseList
 
-import airflow.task.context.execution_context
 from airflow import settings
 from airflow.configuration import conf
 from airflow.exceptions import (
@@ -54,6 +53,7 @@ from airflow.models.xcom import XCOM_RETURN_KEY, XCom
 from airflow.sentry import Sentry
 from airflow.settings import STORE_SERIALIZED_DAGS
 from airflow.stats import Stats
+from airflow.task.context.execution_context import ExecutionContext
 from airflow.ti_deps.dep_context import DepContext
 from airflow.ti_deps.dependencies_deps import REQUEUEABLE_DEPS, RUNNING_DEPS
 from airflow.utils import timezone
@@ -1270,7 +1270,7 @@ class TaskInstance(Base, LoggingMixin):
         return self.task.retries and self.try_number <= self.max_tries
 
     @provide_session
-    def get_template_context(self, session=None) -> airflow.task.context.execution_context.ExecutionContext:
+    def get_template_context(self, session=None) -> ExecutionContext:
         task = self.task
         from airflow import macros
 
@@ -1429,7 +1429,7 @@ class TaskInstance(Base, LoggingMixin):
             'yesterday_ds_nodash': yesterday_ds_nodash,
         }
 
-        return airflow.task.context.execution_context.ExecutionContext(**context)
+        return ExecutionContext(**context)
 
     def get_rendered_template_fields(self):
         """
