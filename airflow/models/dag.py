@@ -1313,9 +1313,9 @@ class DAG(BaseDag, LoggingMixin):
             get_downstream(t)
 
     @property
-    def operator(self):
-        from airflow.operators.python import operator
-        return functools.partial(operator, dag=self)
+    def task(self):
+        from airflow.operators.python import task
+        return functools.partial(task, dag=self)
 
     def add_task(self, task):
         """
